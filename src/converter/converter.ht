@@ -37,13 +37,14 @@ class Converters {
         album: simpleAlbums([track["album"]])[0],
         
         // Additional metadata for downloads
-        artistNames: track["artists"]?.map((artist) => artist["name"]).join(", ") ?? "Unknown Artist",
-        albumName: track["album"]?["name"] ?? "Unknown Album",
-        releaseDate: track["album"]?["release_date"] ?? "",
+        artistNames: track["artists"] != null && track["artists"].isNotEmpty ? 
+          track["artists"].map((artist) => artist["name"]).join(", ") : "Unknown Artist",
+        albumName: track["album"] != null ? track["album"]["name"] : "Unknown Album",
+        releaseDate: track["album"] != null ? track["album"]["release_date"] : "",
         trackNumber: track["track_number"] ?? 1,
         discNumber: track["disc_number"] ?? 1,
-        genres: track["album"]?["genres"] ?? [],
-        label: track["album"]?["label"] ?? "",
+        genres: track["album"] != null && track["album"]["genres"] != null ? track["album"]["genres"] : [],
+        label: track["album"] != null ? track["album"]["label"] : "",
         popularity: track["popularity"] ?? 0,
         previewUrl: track["preview_url"],
       }.toJson()
@@ -77,7 +78,8 @@ class Converters {
         genres: album["genres"],
         
         // Additional metadata for downloads
-        artistNames: album["artists"]?.map((artist) => artist["name"]).join(", ") ?? "Unknown Artist",
+        artistNames: album["artists"] != null && album["artists"].isNotEmpty ? 
+          album["artists"].map((artist) => artist["name"]).join(", ") : "Unknown Artist",
         popularity: album["popularity"] ?? 0,
         copyrights: album["copyrights"] ?? [],
       }.toJson()
@@ -107,7 +109,8 @@ class Converters {
         albumType: (album["album_type"] == "ep" ? "compilation" : album["album_type"]) ?? "album",
         
         // Additional metadata for downloads
-        artistNames: album["artists"]?.map((artist) => artist["name"]).join(", ") ?? "Unknown Artist",
+        artistNames: album["artists"] != null && album["artists"].isNotEmpty ? 
+          album["artists"].map((artist) => artist["name"]).join(", ") : "Unknown Artist",
       }.toJson()
 
       modified.add(albumModified)
@@ -225,15 +228,18 @@ class Converters {
       title: track["name"] ?? "Unknown Title",
       artist: track["artistNames"] ?? "Unknown Artist",
       album: track["albumName"] ?? "Unknown Album",
-      year: track["releaseDate"]?.substring(0, 4) ?? "",
+      year: track["releaseDate"] != null && track["releaseDate"].length >= 4 ? 
+        track["releaseDate"].substring(0, 4) : "",
       trackNumber: track["trackNumber"] ?? 1,
       discNumber: track["discNumber"] ?? 1,
-      genre: track["genres"]?.join(", ") ?? "",
+      genre: track["genres"] != null && track["genres"].isNotEmpty ? 
+        track["genres"].join(", ") : "",
       label: track["label"] ?? "",
       isrc: track["isrc"] ?? "",
       duration: track["durationMs"] ?? 0,
       explicit: track["explicit"] ?? false,
-      albumArt: track["album"]?["images"]?.isNotEmpty == true ? track["album"]["images"][0]["url"] : null,
+      albumArt: track["album"] != null && track["album"]["images"] != null && track["album"]["images"].isNotEmpty ? 
+        track["album"]["images"][0]["url"] : null,
     }.toJson()
   }
 }
