@@ -35,20 +35,17 @@ class Converters {
         isrc: track["external_ids"]["isrc"] ?? "",
         artists: simpleArtists(track["artists"]),
         album: simpleAlbums([track["album"]])[0],
-        // Add metadata fields for downloads
-        spotifyMetadata: {
-          trackId: track["id"],
-          artistIds: track["artists"].map((a) => a["id"]).toList(),
-          albumId: track["album"]?["id"],
-          albumImages: track["album"]?["images"] ?? [],
-          releaseDate: track["album"]?["release_date"],
-          artistNames: track["artists"].map((a) => a["name"]).toList(),
-          albumName: track["album"]?["name"],
-          trackNumber: track["track_number"],
-          discNumber: track["disc_number"],
-          popularity: track["popularity"] ?? 0,
-          previewUrl: track["preview_url"],
-        }.toJson()
+        
+        // Additional metadata for downloads
+        artistNames: track["artists"]?.map((artist) => artist["name"]).join(", ") ?? "Unknown Artist",
+        albumName: track["album"]?["name"] ?? "Unknown Album",
+        releaseDate: track["album"]?["release_date"] ?? "",
+        trackNumber: track["track_number"] ?? 1,
+        discNumber: track["disc_number"] ?? 1,
+        genres: track["album"]?["genres"] ?? [],
+        label: track["album"]?["label"] ?? "",
+        popularity: track["popularity"] ?? 0,
+        previewUrl: track["preview_url"],
       }.toJson()
 
       modified.add(modifiedTrack)
@@ -77,7 +74,12 @@ class Converters {
         albumType: (album["album_type"] == "ep" ? "compilation" : album["album_type"]) ?? "album",
         totalTracks: album["total_tracks"],
         recordLabel: album["label"],
-        genres: album["genres"]
+        genres: album["genres"],
+        
+        // Additional metadata for downloads
+        artistNames: album["artists"]?.map((artist) => artist["name"]).join(", ") ?? "Unknown Artist",
+        popularity: album["popularity"] ?? 0,
+        copyrights: album["copyrights"] ?? [],
       }.toJson()
 
       modified.add(modifiedAlbum)
@@ -103,6 +105,9 @@ class Converters {
         artists: simpleArtists(album["artists"]),
         images: album["images"],
         albumType: (album["album_type"] == "ep" ? "compilation" : album["album_type"]) ?? "album",
+        
+        // Additional metadata for downloads
+        artistNames: album["artists"]?.map((artist) => artist["name"]).join(", ") ?? "Unknown Artist",
       }.toJson()
 
       modified.add(albumModified)
@@ -126,6 +131,9 @@ class Converters {
         images: artist["images"],
         genres: artist["genres"] ?? [],
         followers: artist["followers"]?["total"],
+        
+        // Additional metadata for downloads
+        popularity: artist["popularity"] ?? 0,
       }.toJson()
 
       modified.add(artistModified)
@@ -144,9 +152,12 @@ class Converters {
     for(var artist in artists) {
       var artistModified = {
         id: artist["id"],
-        name: artist["name"],
+        name: artist["name"] ?? "Unbekannter Künstler",
         externalUri: artist["external_urls"]["spotify"] ?? "https://open.spotify.com/artist/${artist["id"]}",
-        images: artist["images"], // Optional
+        images: artist["images"] ?? [],
+        
+        // Avatar URL für einfachen Zugriff
+        avatarUrl: artist["images"]?.isNotEmpty == true ? artist["images"][0]["url"] : null,
       }.toJson()
 
       modified.add(artistModified)
@@ -206,6 +217,24 @@ class Converters {
     }
 
     return modified
+  }
+
+  // Helper function to get download metadata from track
+  static fun getDownloadMetadata(track: Map) -> Map {
+    return {
+      title: track["name"] ?? "Unknown Title",
+      artist: track["artistNames"] ?? "Unknown Artist",
+      album: track["albumName"] ?? "Unknown Album",
+      year: track["releaseDate"]?.substring(0, 4) ?? "",
+      trackNumber: track["trackNumber"] ?? 1,
+      discNumber: track["discNumber"] ?? 1,
+      genre: track["genres"]?.join(", ") ?? "",
+      label: track["label"] ?? "",
+      isrc: track["isrc"] ?? "",
+      duration: track["durationMs"] ?? 0,
+      explicit: track["explicit"] ?? false,
+      albumArt: track["album"]?["images"]?.isNotEmpty == true ? track["album"]["images"][0]["url"] : null,
+    }.toJson()
   }
 }
 
