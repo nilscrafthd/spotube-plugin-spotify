@@ -33,8 +33,16 @@ class Converters {
         explicit: track["explicit"] ?? false,
         durationMs: track["duration_ms"] ?? 0,
         isrc: track["external_ids"]["isrc"] ?? "",
+        popularity: track["popularity"] ?? 0,
+        previewUrl: track["preview_url"],
+        discNumber: track["disc_number"] ?? 1,
+        trackNumber: track["track_number"] ?? 1,
         artists: simpleArtists(track["artists"]),
         album: simpleAlbums([track["album"]])[0],
+        images: track["album"]?["images"] ?? [],
+        year: track["album"]?["release_date"]?.substring(0, 4),
+        albumArtist: track["album"]?["artists"]?[0]?["name"] ?? "",
+        genre: track["album"]?["genres"]?[0] ?? "",
       }.toJson()
 
       modified.add(modifiedTrack)
